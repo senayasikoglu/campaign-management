@@ -63,7 +63,7 @@ const CampaignController = {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
-      const search = req.query.search || "";
+      const search = req.query.filter || "";
 
       const result = await CampaignService.getAllCampaigns(page, limit, search);
       res.status(200).json(result);

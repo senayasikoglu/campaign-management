@@ -26,10 +26,6 @@ const CampaignService = {
       const campaign = new Campaign(campaignData);
       return await campaign.save();
     } catch (error) {
-      // Enhance error message for duplicate campaign names
-      if (error.code === 11000) {
-        throw new Error('Campaign name already exists');
-      }
       throw error;
     }
   },
@@ -43,10 +39,13 @@ const CampaignService = {
    * @returns {Promise<Object>} Paginated results with campaign data and metadata
    * @throws {Error} If database operation fails
    */
-  async getAllCampaigns(page, limit, search) {
+  async getAllCampaigns(page, limit, filter) {
     try {
-      const query = search
-        ? { name: { $regex: search, $options: 'i' } }
+      const query = filter
+        ? { $or: [
+          { name: { $regex: filter, $options: 'i' } },
+          { channel: { $regex: filter, $options: 'i' } }
+        ] }
         : {};
 
       const skip = (page - 1) * limit;

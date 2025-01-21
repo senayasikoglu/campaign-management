@@ -75,24 +75,20 @@ const AuthService = {
    */
   async login(email, password) {
     try {
-      // Input validation
-      if (!email || !password) {
-        throw new Error('Email and password are required');
-      }
-
-      // Convert password to string and trim
-      const passwordStr = String(password).trim();
-
-      console.log('Login attempt:', {
-        email,
-        passwordLength: passwordStr.length
-      });
-
+   
       // Find user
       const user = await User.findOne({ email });
       if (!user) {
         throw new Error('Invalid credentials');
       }
+
+       // Convert password to string and trim
+       const passwordStr = String(password).trim();
+
+       console.log('Login attempt:', {
+         email,
+         passwordLength: passwordStr.length
+       });
  
 
       // Compare passwords using compareSync
@@ -123,24 +119,7 @@ const AuthService = {
       throw error;
     }
   },
-
-  /**
-   * Verify JWT token and return decoded user data
-   * 
-   * @param {string} token - JWT token to verify
-   * @returns {Promise<Object>} Decoded user data from token
-   * @throws {Error} If token is invalid or expired
-   */
-  async verifyToken(token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      return decoded;
-    } catch (error) {
-      error = new Error('Invalid or expired token');
-      error.status = 401;
-      throw error;
-    }
-  },
+ 
 
  
  

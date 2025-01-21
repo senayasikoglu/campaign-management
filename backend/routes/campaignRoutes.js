@@ -2,7 +2,7 @@ const router = require("express").Router();
 const CampaignController = require("../controllers/campaignController");
 const authentication = require("../middleware/middleware.auth");
 
-// Create a new campaign
+
 router.post("/", authentication, CampaignController.createCampaign);
 router.get("/", authentication, CampaignController.getAllCampaigns);
 router.get("/:id", authentication, CampaignController.getCampaignById);
