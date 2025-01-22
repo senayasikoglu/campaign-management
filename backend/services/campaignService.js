@@ -36,11 +36,14 @@ const CampaignService = {
    * @param {number} page - Page number for pagination
    * @param {number} limit - Number of items per page
    * @param {string} search - Optional search term for campaign name
+   * @param {string} sortField - Field to sort by (e.g., 'startDate', 'name', 'budget')
+   * @param {string} sortOrder - Sort order ('asc' or 'desc')
    * @returns {Promise<Object>} Paginated results with campaign data and metadata
    * @throws {Error} If database operation fails
    */
-  async getAllCampaigns(page, limit, filter) {
+  async getAllCampaigns(page, limit, filter, sortField = 'name', sortOrder = 'asc') {
     try {
+      //search by name or channel
       const query = filter
         ? { $or: [
           { name: { $regex: filter, $options: 'i' } },
@@ -50,11 +53,15 @@ const CampaignService = {
 
       const skip = (page - 1) * limit;
       
+      // Create sort object
+      const sort = {};
+      sort[sortField] = sortOrder === 'desc' ? -1 : 1;
+
       const [campaigns, total] = await Promise.all([
         Campaign.find(query)
           .skip(skip)
           .limit(limit)
-          .sort({ createdAt: -1 }),
+          .sort(sort),
         Campaign.countDocuments(query)
       ]);
 

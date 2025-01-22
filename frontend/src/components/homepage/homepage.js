@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate,Link } from "react-router-dom";
- import "./homepage.css";
+import { useNavigate, Link } from "react-router-dom";
+import "./homepage.css";
 import api from '../../utils/api';
 
 const HomePage = () => {
@@ -8,6 +8,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [sortField, setSortField] = useState("startDate");
+  const [sortOrder, setSortOrder] = useState("asc");
   
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -18,8 +19,6 @@ const HomePage = () => {
   });
 
   const perPageOptions = [5, 10, 25];
-
-
   const navigate = useNavigate();
 
   // Get status of campaign by date
@@ -46,10 +45,9 @@ const HomePage = () => {
     }
   };
 
-
   useEffect(() => {
     fetchCampaigns();
-  }, [pagination.page, pagination.limit, filter]);
+  }, [pagination.page, pagination.limit, filter, sortField, sortOrder]);
 
   // Fetch campaigns
   const fetchCampaigns = async () => {
@@ -61,19 +59,20 @@ const HomePage = () => {
             page: pagination.page,
             limit: pagination.limit,
             filter,
+            sortField,
+            sortOrder
           },
         } 
       );
 
       setCampaigns(response.data.campaigns);
-       if (response.data.campaigns.length > 0 ) {
+      if (response.data.campaigns.length > 0) {
         setPagination(prev => ({
           ...prev,
           total: response.data.total,
-          totalPages:  Math.ceil(response.data.total / response.data.limit) 
+          totalPages: Math.ceil(response.data.total / response.data.limit) 
         }));
-        
-       }
+      }
       setLoading(false);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
@@ -101,6 +100,12 @@ const HomePage = () => {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
+  const handleSortChange = (e) => {
+    const newSortField = e.target.value;
+    setSortField(newSortField);
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this campaign?")) {
       try {
@@ -112,15 +117,7 @@ const HomePage = () => {
     }
   };
 
-  const filteredCampaigns = campaigns
-    .filter(
-      (campaign) =>
-        campaign.name.toLowerCase().includes(filter.toLowerCase()) ||
-        campaign.channel.toLowerCase().includes(filter.toLowerCase())
-    )
-    .sort((a, b) => (a[sortField] > b[sortField] ? 1 : -1));
-
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="loading">Loading...</div>;
 
   return (
     <div className="dashboard">
@@ -132,15 +129,23 @@ const HomePage = () => {
           onChange={handleFilterChange}
         />
         <select
-          onChange={(e) => setSortField(e.target.value)}
+          onChange={handleSortChange}
           value={sortField}
         >
           <option value="startDate">Sort by Start Date</option>
+          <option value="endDate">Sort by End Date</option>
           <option value="name">Sort by Name</option>
           <option value="budget">Sort by Budget</option>
+          <option value="channel">Sort by Channel</option>
+        </select>
+        <select
+          onChange={(e) => setSortOrder(e.target.value)}
+          value={sortOrder}
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
         </select>
         <Link to="/campaign/add" className="navbar-item">New Campaign</Link>
-
       </div>
 
       <table className="campaigns-table">
@@ -157,7 +162,7 @@ const HomePage = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredCampaigns.length > 0 ? filteredCampaigns.map(campaign => {
+          {campaigns.length > 0 ? campaigns.map(campaign => {
             const status = getStatusByDate(campaign.startDate, campaign.endDate);
             return (
               <tr key={campaign._id}>

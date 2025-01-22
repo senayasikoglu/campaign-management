@@ -56,6 +56,8 @@ const CampaignController = {
    * @param {number} req.query.page - Page number (default: 1)
    * @param {number} req.query.limit - Items per page (default: 10)
    * @param {string} req.query.search - Optional search term
+   * @param {string} req.query.sortField - Field to sort by (default: startDate)
+   * @param {string} req.query.sortOrder - Sort order (asc/desc) (default: asc)
    * @returns {Object} Paginated campaigns with metadata
    * @throws {500} If there's a server error
    */
@@ -64,8 +66,28 @@ const CampaignController = {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const search = req.query.filter || "";
+      const sortField = req.query.sortField || "startDate";
+      const sortOrder = req.query.sortOrder || "asc";
 
-      const result = await CampaignService.getAllCampaigns(page, limit, search);
+      // Validate sort field to prevent injection
+      const allowedSortFields = ['name', 'startDate', 'endDate', 'budget', 'channel'];
+      if (!allowedSortFields.includes(sortField)) {
+        return res.status(400).json({ message: "Invalid sort field" });
+      }
+
+      // Validate sort order
+      if (!['asc', 'desc'].includes(sortOrder)) {
+        return res.status(400).json({ message: "Invalid sort order" });
+      }
+
+      const result = await CampaignService.getAllCampaigns(
+        page, 
+        limit, 
+        search, 
+        sortField, 
+        sortOrder
+      );
+      
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({ message: error.message });
