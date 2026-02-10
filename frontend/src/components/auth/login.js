@@ -60,7 +60,7 @@ const Login = () => {
             />
           </div>
           <div className="form-group">
-            <label>Şifre:</label>
+            <label>Password:</label>
             <input
               type="password"
               value={password}

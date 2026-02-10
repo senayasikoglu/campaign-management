@@ -167,7 +167,7 @@ const HomePage = () => {
             return (
               <tr key={campaign._id}>
                 <td>{campaign.name}</td>
-                <td>{campaign.channel}</td>
+                <td>{campaign.channel ? campaign.channel.name : "N/A"}</td>
                 <td>{new Date(campaign.startDate).toLocaleDateString()}</td>
                 <td>{new Date(campaign.endDate).toLocaleDateString()}</td>
                 <td>${campaign.budget ? campaign.budget.toFixed(2) : 0}</td>

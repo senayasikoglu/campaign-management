@@ -37,7 +37,7 @@ function App() {
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-    </Router>
+    </Router>   
   );
 }
 

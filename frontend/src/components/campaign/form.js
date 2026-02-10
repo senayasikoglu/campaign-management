@@ -6,12 +6,14 @@ import './form.css';
 const CampaignForm = () => {
   const [formData, setFormData] = useState({
     name: '',
-    channel: 'SOCIAL_MEDIA',
+    channel: '',
     startDate: '',
     endDate: '',
     budget: '',
     status: 'PLANNED'
   });
+
+  const [channels, setChannels] = useState([]);
   const [error, setError] = useState('');
  
   const navigate = useNavigate();
@@ -21,7 +23,19 @@ const CampaignForm = () => {
     if (id) {
       fetchCampaign();
     }
+    fetchChannels();
   }, [id]);
+
+  //Fetch available channels from API
+  const fetchChannels = async () => {
+    try {
+      const response = await api.get('/channels');
+      console.log("Fetched channels:", response.data);
+      setChannels(response.data);
+    } catch (error) {
+      console.log("Error fetching channels:" , error);
+    }
+  }
 
   // Fetch campaign data
   const fetchCampaign = async () => {
@@ -89,11 +103,12 @@ const CampaignForm = () => {
 
         <div className="form-group">
           <label>Channel:</label>
-          <select name="channel" value={formData.channel} onChange={handleChange}>
-            <option value="TV">TV</option>
-            <option value="RADIO">Radio</option>
-            <option value="SOCIAL_MEDIA">Social Media</option>
-            <option value="SEARCH_ENGINE">Search Engine</option>
+          <select name="channel" value={formData.channel} onChange={handleChange} required>
+            <option value="">Select a Channel</option>
+            {[...new Map(channels.map(channel => [channel.name, channel])).values()]
+               .map(uniqueChannel => (
+                 <option key={uniqueChannel._id} value={uniqueChannel._id}>{uniqueChannel.name}</option>
+               ))}
           </select>
         </div>
 
