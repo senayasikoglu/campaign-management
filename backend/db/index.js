@@ -10,10 +10,7 @@ const MONGO_URI =
 
 // Connect to MongoDB
 mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,     
-    useUnifiedTopology: true, 
-  })
+  .connect(MONGO_URI)
   .then((x) => {
     const dbName = x.connections[0].name;
     console.log(`Connected to Mongo! Database name: "${dbName}"`);

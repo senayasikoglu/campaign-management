@@ -2,7 +2,6 @@
  * Authentication Middleware
  * Checks if user is logged in by validating JWT token
  */
-
 const jwt = require('jsonwebtoken');
 
 
@@ -17,7 +16,7 @@ const auth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
+    req.userId = decoded.id;
     next();
   } catch (error) {
     res.status(401).json({ message: 'Please authenticate' });

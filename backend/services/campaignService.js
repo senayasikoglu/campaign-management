@@ -7,11 +7,9 @@
  * @module services/campaignService
  */
 
-const mongoose = require("mongoose");
 const calculateSpent = require("../utils/spentCalculator");
 const Campaign = require("../models/Campaign");
-
- 
+const channelCache = require("../utils/channelCache");
 
 const CampaignService = {
   /**
@@ -43,22 +41,33 @@ const CampaignService = {
    */
   async getAllCampaigns(page, limit, filter, sortField = 'name', sortOrder = 'asc') {
     try {
-      //search by name or channel
-      const query = filter
-        ? { $or: [
-          { name: { $regex: filter, $options: 'i' } },
-          { channel: { $regex: filter, $options: 'i' } }
-        ] }
-        : {};
+
+ 
+      // Search by campaign name or channel name (channels: cached once on app startup, invalidated on channel CRUD operations).
+      let query = {};
+      if (filter && String(filter).trim()) {
+        const escaped = String(filter).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, 'i');
+
+        const allChannels = await channelCache.getChannels();
+        const channelIds = allChannels.filter((c) => regex.test(c.name)).map((c) => c._id);
+
+        query = {
+          $or: [
+            { name: regex },
+            { channel: { $in: channelIds } },
+          ],
+        };
+      }
 
       const skip = (page - 1) * limit;
-      
       // Create sort object
       const sort = {};
       sort[sortField] = sortOrder === 'desc' ? -1 : 1;
 
       const [campaigns, total] = await Promise.all([
         Campaign.find(query)
+          .populate('channel')
           .skip(skip)
           .limit(limit)
           .sort(sort),
@@ -79,6 +88,7 @@ const CampaignService = {
         total
       };
     } catch (error) {
+      console.error(error);
       throw new Error(`Error fetching campaigns: ${error.message}`);
     }
   },

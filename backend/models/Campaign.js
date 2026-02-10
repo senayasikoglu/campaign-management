@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const campaignSchema = new mongoose.Schema({
   name: {
@@ -7,9 +8,9 @@ const campaignSchema = new mongoose.Schema({
     trim: true
   },
   channel: {
-    type: String,
-    required: true,
-    enum: ['TV', 'RADIO', 'SOCIAL_MEDIA', 'SEARCH_ENGINE']
+    type: Schema.Types.ObjectId,
+    ref: 'Channel',
+    required: true
   },
   startDate: {
     type: Date,

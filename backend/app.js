@@ -8,6 +8,7 @@ const cors = require("cors");
 
 const campaignRoutes = require('./routes/campaignRoutes');
 const authRoutes = require('./routes/auth');
+const channelRoutes = require('./routes/channelRoutes');
 
 const app = express();
 
@@ -22,6 +23,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 app.use('/api/campaigns', campaignRoutes);
+
+app.use('/api/channels', channelRoutes);
 
 
 module.exports = app;
