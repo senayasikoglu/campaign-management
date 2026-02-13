@@ -8,9 +8,7 @@
  */
 
 const CampaignService = require("../services/campaignService");
-const Channel = require("../models/Channel");
 
-const Campaign = require("../models/Campaign");
 
 const CampaignController = {
 
@@ -42,22 +40,9 @@ const CampaignController = {
           .json({ message: "Start date must be before end date." });
       }
 
-      // check if the provided channel exists
-      const existingChannel = await Channel.findById(channel);
-      if(!existingChannel){
-        return res
-        .status(400)
-        .json({message: "The specified channel does not exist"});
-      }
-
-      //create the campaign
       const campaign = await CampaignService.createCampaign(req.body);
 
-      const populatedCampaign = await Campaign.findById(campaign._id).populate('channel');
-      if (!populatedCampaign) {
-        return res.status(404).json({ message: 'Campaign not found' });
-      }
-      res.status(201).json(populatedCampaign);
+      res.status(201).json(campaign);
     } catch (error) {
       console.log(error);
       res.status(400).json({ message: error.message });

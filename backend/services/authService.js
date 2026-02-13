@@ -60,6 +60,7 @@ const AuthService = {
       };
 
     } catch (error) {
+      console.error('Registration error:', error);
       throw error;
     }
   },
@@ -81,9 +82,19 @@ const AuthService = {
         throw new Error('Invalid credentials');
       }
 
-      const passwordStr = String(password).trim();
+       // Convert password to string and trim
+       const passwordStr = String(password).trim();
 
+       console.log('Login attempt:', {
+         email,
+         passwordLength: passwordStr.length
+       });
+ 
+
+      // Compare passwords using compareSync
       const isMatch = bcrypt.compareSync(passwordStr, user.password);
+ 
+
       if (!isMatch) {
         throw new Error('Invalid credentials');
       }
@@ -104,9 +115,14 @@ const AuthService = {
       };
 
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   },
+ 
+
+ 
+ 
 };
 
 module.exports = AuthService; 
