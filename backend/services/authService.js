@@ -10,6 +10,8 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Generic login error message to avoid leaking whether email exists or password is wrong
+const errorMessage = 'Invalid credentials, please check your email or password';
 const AuthService = {
   /**
    * Register a new user
@@ -20,8 +22,6 @@ const AuthService = {
    */
   async register(email, password) {
     try {
-  
-    
       const existingUser = await User.findOne({ email: email });
       if (existingUser) {
         const error = new Error('Email already registered');
@@ -60,7 +60,7 @@ const AuthService = {
       };
 
     } catch (error) {
-      console.error('Registration error:', error);
+      // Let controller decide how to log and format the error response
       throw error;
     }
   },
@@ -75,28 +75,23 @@ const AuthService = {
    */
   async login(email, password) {
     try {
-   
       // Find user
       const user = await User.findOne({ email });
       if (!user) {
-        throw new Error('Invalid credentials');
+        const error = new Error(errorMessage);
+        error.status = 401;
+        throw error;
       }
 
-       // Convert password to string and trim
-       const passwordStr = String(password).trim();
+      // Convert password to string and trim
+      const passwordStr = String(password).trim();
 
-       console.log('Login attempt:', {
-         email,
-         passwordLength: passwordStr.length
-       });
- 
-
-      // Compare passwords using compareSync
+      // Compare passwords
       const isMatch = bcrypt.compareSync(passwordStr, user.password);
- 
-
       if (!isMatch) {
-        throw new Error('Invalid credentials');
+        const error = new Error(errorMessage);
+        error.status = 401;
+        throw error;
       }
 
       // Generate token
@@ -115,7 +110,7 @@ const AuthService = {
       };
 
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Catched error in login service:', error);
       throw error;
     }
   },
