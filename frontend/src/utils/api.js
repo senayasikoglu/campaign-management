@@ -21,10 +21,20 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    const status = error.response?.status;
+    const originalUrl = error.config?.url || '';
+
+    // Only force logout + redirect for protected requests, not for login itself
+    if (status === 401) {
+      const hasToken = !!localStorage.getItem('token');
+      const isLoginRequest = originalUrl.includes('/auth/login');
+
+      if (hasToken && !isLoginRequest) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
+
     return Promise.reject(error);
   }
 );

@@ -3,6 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../utils/api';
 import './form.css';
 
+// Static channel options must stay in sync with backend Campaign model enum
+const CHANNEL_OPTIONS = [
+  { value: 'TV', label: 'TV' },
+  { value: 'RADIO', label: 'Radio' },
+  { value: 'SOCIAL_MEDIA', label: 'Social Media' },
+  { value: 'SEARCH_ENGINE', label: 'Search Engine' },
+];
+
 const CampaignForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -13,7 +21,6 @@ const CampaignForm = () => {
     status: 'PLANNED'
   });
 
-  const [channels, setChannels] = useState([]);
   const [error, setError] = useState('');
  
   const navigate = useNavigate();
@@ -23,19 +30,7 @@ const CampaignForm = () => {
     if (id) {
       fetchCampaign();
     }
-    fetchChannels();
   }, [id]);
-
-  //Fetch available channels from API
-  const fetchChannels = async () => {
-    try {
-      const response = await api.get('/channels');
-      console.log("Fetched channels:", response.data);
-      setChannels(response.data);
-    } catch (error) {
-      console.log("Error fetching channels:" , error);
-    }
-  }
 
   // Fetch campaign data
   const fetchCampaign = async () => {
@@ -103,12 +98,18 @@ const CampaignForm = () => {
 
         <div className="form-group">
           <label>Channel:</label>
-          <select name="channel" value={formData.channel} onChange={handleChange} required>
+          <select
+            name="channel"
+            value={formData.channel}
+            onChange={handleChange}
+            required
+          >
             <option value="">Select a Channel</option>
-            {[...new Map(channels.map(channel => [channel.name, channel])).values()]
-               .map(uniqueChannel => (
-                 <option key={uniqueChannel._id} value={uniqueChannel._id}>{uniqueChannel.name}</option>
-               ))}
+            {CHANNEL_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
